@@ -1,23 +1,30 @@
-{% load static %}
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Brand Mention Tracker</title>
-    {% if css_file %}
-    <link rel="stylesheet" crossorigin href="{% static css_file %}">
-    {% endif %}
-  </head>
-  <body>
-    <div id="root"></div>
-    {% if js_file %}
-    <script type="module" crossorigin src="{% static js_file %}"></script>
-    {% else %}
-    <div style="padding: 20px; text-align: center;">
-      <h2>React app not built</h2>
-      <p>Please run: <code>cd frontend && npm run build</code></p>
-    </div>
-    {% endif %}
-  </body>
-</html>
+{% extends 'tracker/base.html' %}
+
+{% block content %}
+<div class="text-center py-12">
+  <h2 class="text-2xl font-bold text-gray-900 mb-4">Welcome to Brand Mention Tracker</h2>
+  <p class="text-gray-600 mb-8">Select a section from the navigation above to get started.</p>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+    <a href="{% url 'dashboard' %}" class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+      <div class="text-4xl mb-2">📊</div>
+      <h3 class="font-bold text-lg mb-2">Dashboard</h3>
+      <p class="text-sm text-gray-600">View statistics and analytics</p>
+    </a>
+    <a href="{% url 'mentions' %}" class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+      <div class="text-4xl mb-2">💬</div>
+      <h3 class="font-bold text-lg mb-2">Mentions</h3>
+      <p class="text-sm text-gray-600">Browse all brand mentions</p>
+    </a>
+    <a href="{% url 'alerts' %}" class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+      <div class="text-4xl mb-2">🚨</div>
+      <h3 class="font-bold text-lg mb-2">Alerts</h3>
+      <p class="text-sm text-gray-600">Real-time alerts and notifications</p>
+    </a>
+    <a href="{% url 'feeds' %}" class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+      <div class="text-4xl mb-2">📡</div>
+      <h3 class="font-bold text-lg mb-2">RSS Feeds</h3>
+      <p class="text-sm text-gray-600">Manage RSS feed sources</p>
+    </a>
+  </div>
+</div>
+{% endblock %}

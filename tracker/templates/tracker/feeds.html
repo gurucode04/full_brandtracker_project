@@ -1,0 +1,46 @@
+{% extends 'tracker/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-md p-6">
+  <h2 class="text-xl font-bold mb-4">RSS Feed Manager</h2>
+  
+  <form method="post" class="mb-4">
+    {% csrf_token %}
+    <div class="flex gap-2">
+      {{ form.url }}
+      <button
+        type="submit"
+        class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium"
+      >
+        Add Feed
+      </button>
+    </div>
+    {% if form.url.errors %}
+      <div class="mt-2 text-red-600 text-sm">{{ form.url.errors }}</div>
+    {% endif %}
+  </form>
+
+  <div>
+    <h3 class="text-sm font-semibold text-gray-700 mb-2">Quick Add Popular Feeds:</h3>
+    <div class="flex flex-wrap gap-2">
+      {% for feed_url in default_feeds %}
+      <button
+        onclick="document.querySelector('input[name=url]').value='{{ feed_url }}'"
+        class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+      >
+        {{ feed_url|slice:"8:"|truncatewords:1|cut:"/" }}
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+    <p class="text-sm text-blue-800">
+      <strong>Note:</strong> The system will fetch the latest items from the RSS feed and analyze them for sentiment and topics. 
+      Processing may take a few moments.
+    </p>
+  </div>
+</div>
+{% endblock %}
+

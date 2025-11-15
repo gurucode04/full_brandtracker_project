@@ -1,0 +1,115 @@
+{% extends 'tracker/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-md p-6">
+  <div class="mb-4">
+    <h2 class="text-xl font-bold">Real-time Alerts</h2>
+    <p class="text-sm text-gray-600">Live alerts for negative spikes and unusual activity</p>
+  </div>
+  
+  <div id="alerts-container" class="space-y-3 max-h-96 overflow-y-auto">
+    {% if alerts %}
+      {% for alert in alerts %}
+      <div class="p-4 border-l-4 rounded-lg shadow-sm {% if 'negative' in alert.alert_type or 'spike' in alert.alert_type %}border-red-500 bg-red-50{% else %}border-yellow-500 bg-yellow-50{% endif %}">
+        <div class="flex items-start justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-semibold text-red-700 uppercase">
+              {{ alert.alert_type|default:"Alert" }}
+            </span>
+          </div>
+          <span class="text-xs text-gray-600">{{ alert.created_at|timesince }} ago</span>
+        </div>
+        
+        <div class="text-sm text-gray-700 mb-2">{{ alert.description|default:"" }}</div>
+        
+        {% if alert.mention %}
+        <div class="mt-2 p-2 bg-white rounded border border-gray-200">
+          <p class="text-xs text-gray-500 mb-1">Related Mention:</p>
+          <p class="text-xs text-gray-700 line-clamp-2">{{ alert.mention.text|truncatewords:20 }}</p>
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="text-center py-8 text-gray-500">
+        <p>No alerts yet. Alerts will appear here when negative sentiment spikes are detected.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  // WebSocket connection for real-time alerts
+  (function() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws/mentions/`;
+    const container = document.getElementById('alerts-container');
+    
+    let ws;
+    
+    function connect() {
+      try {
+        ws = new WebSocket(wsUrl);
+        
+        ws.onopen = () => {
+          console.log('WebSocket connected');
+        };
+        
+        ws.onmessage = (e) => {
+          try {
+            const data = JSON.parse(e.data);
+            // Add new alert to the top of the container
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'p-4 border-l-4 rounded-lg shadow-sm ' + 
+              ((data.alert_type && (data.alert_type.includes('negative') || data.alert_type.includes('spike'))) 
+                ? 'border-red-500 bg-red-50' 
+                : 'border-yellow-500 bg-yellow-50');
+            
+            const timeAgo = 'Just now';
+            alertDiv.innerHTML = `
+              <div class="flex items-start justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-semibold text-red-700 uppercase">${data.alert_type || 'Alert'}</span>
+                  <span class="px-2 py-1 text-xs bg-green-500 text-white rounded-full animate-pulse">LIVE</span>
+                </div>
+                <span class="text-xs text-gray-600">${timeAgo}</span>
+              </div>
+              <div class="text-sm text-gray-700 mb-2">${data.description || ''}</div>
+              ${data.mention_text ? `
+                <div class="mt-2 p-2 bg-white rounded border border-gray-200">
+                  <p class="text-xs text-gray-500 mb-1">Related Mention:</p>
+                  <p class="text-xs text-gray-700 line-clamp-2">${data.mention_text.substring(0, 100)}</p>
+                </div>
+              ` : ''}
+            `;
+            
+            // Insert at the top, remove old ones if too many
+            container.insertBefore(alertDiv, container.firstChild);
+            const alerts = container.querySelectorAll('div');
+            if (alerts.length > 50) {
+              container.removeChild(alerts[alerts.length - 1]);
+            }
+          } catch (err) {
+            console.error('Error parsing WebSocket message:', err);
+          }
+        };
+        
+        ws.onerror = (err) => {
+          console.error('WebSocket error:', err);
+        };
+        
+        ws.onclose = () => {
+          console.log('WebSocket closed, reconnecting in 3 seconds...');
+          setTimeout(connect, 3000);
+        };
+      } catch (err) {
+        console.error('WebSocket connection error:', err);
+      }
+    }
+    
+    connect();
+  })();
+</script>
+{% endblock %}
+

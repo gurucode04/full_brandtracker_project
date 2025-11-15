@@ -1,0 +1,72 @@
+{% extends 'tracker/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-md p-6">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-bold">Recent Mentions</h2>
+    <div class="flex gap-2">
+      <a href="{% url 'mentions' %}?filter=all" class="px-4 py-2 rounded text-sm font-medium {% if current_filter == 'all' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+        All
+      </a>
+      <a href="{% url 'mentions' %}?filter=positive" class="px-4 py-2 rounded text-sm font-medium {% if current_filter == 'positive' %}bg-green-500 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+        Positive
+      </a>
+      <a href="{% url 'mentions' %}?filter=neutral" class="px-4 py-2 rounded text-sm font-medium {% if current_filter == 'neutral' %}bg-gray-500 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+        Neutral
+      </a>
+      <a href="{% url 'mentions' %}?filter=negative" class="px-4 py-2 rounded text-sm font-medium {% if current_filter == 'negative' %}bg-red-500 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+        Negative
+      </a>
+    </div>
+  </div>
+
+  <div class="space-y-3 max-h-96 overflow-y-auto">
+    {% if mentions %}
+      {% for mention in mentions %}
+      <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+        <div class="flex items-start justify-between mb-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="px-2 py-1 rounded text-xs font-semibold border 
+              {% if mention.sentiment == 'positive' %}bg-green-100 text-green-800 border-green-300
+              {% elif mention.sentiment == 'negative' %}bg-red-100 text-red-800 border-red-300
+              {% else %}bg-gray-100 text-gray-800 border-gray-300{% endif %}">
+              {{ mention.sentiment|default:"Processing..." }}
+            </span>
+            {% if mention.sentiment_score %}
+            <span class="text-xs text-gray-500">
+              {{ mention.sentiment_score|floatformat:0 }}%
+            </span>
+            {% endif %}
+            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+              {{ mention.source }}
+            </span>
+          </div>
+          <span class="text-xs text-gray-500">
+            {{ mention.created_at|date:"M d, Y H:i" }}
+          </span>
+        </div>
+        
+        <p class="text-sm text-gray-700 mb-2 line-clamp-3">
+          {{ mention.text|truncatewords:50 }}
+        </p>
+        
+        {% if mention.topic %}
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-500">Topic:</span>
+          <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+            {{ mention.topic }}
+          </span>
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="text-center py-8 text-gray-500">
+        No mentions found {% if current_filter != 'all' %}with {{ current_filter }} sentiment{% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,168 @@
+{% extends 'tracker/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="space-y-6">
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+      <h3 class="text-sm font-medium text-gray-500">Total Mentions</h3>
+      <p class="text-3xl font-bold text-gray-900 mt-2">{{ total_mentions }}</p>
+      <p class="text-xs text-gray-500 mt-1">{{ mentions_24h }} in last 24h</p>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+      <h3 class="text-sm font-medium text-gray-500">Positive</h3>
+      <p class="text-3xl font-bold text-green-600 mt-2">{{ sentiment.positive }}</p>
+      <p class="text-xs text-gray-500 mt-1">
+        {% if sentiment.total > 0 %}
+          {% widthratio sentiment.positive sentiment.total 100 %}% of total
+        {% else %}
+          0% of total
+        {% endif %}
+      </p>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-red-500">
+      <h3 class="text-sm font-medium text-gray-500">Negative</h3>
+      <p class="text-3xl font-bold text-red-600 mt-2">{{ sentiment.negative }}</p>
+      <p class="text-xs text-gray-500 mt-1">
+        {% if sentiment.total > 0 %}
+          {% widthratio sentiment.negative sentiment.total 100 %}% of total
+        {% else %}
+          0% of total
+        {% endif %}
+      </p>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
+      <h3 class="text-sm font-medium text-gray-500">Active Alerts</h3>
+      <p class="text-3xl font-bold text-yellow-600 mt-2">{{ unresolved_alerts }}</p>
+      <p class="text-xs text-gray-500 mt-1">{{ recent_alerts }} in last 24h</p>
+    </div>
+  </div>
+
+  <!-- Sentiment Breakdown -->
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-xl font-bold mb-4">Sentiment Breakdown</h2>
+    <div class="space-y-3">
+      <div>
+        <div class="flex justify-between text-sm mb-1">
+          <span class="text-green-600 font-medium">Positive</span>
+          <span>
+            {{ sentiment.positive }} 
+            ({% if sentiment.total > 0 %}{% widthratio sentiment.positive sentiment.total 100 %}%{% else %}0%{% endif %})
+          </span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-3">
+          <div 
+            class="bg-green-500 h-3 rounded-full transition-all"
+            style="width: {% if sentiment.total > 0 %}{% widthratio sentiment.positive sentiment.total 100 %}%{% else %}0%{% endif %}"
+          ></div>
+        </div>
+      </div>
+      
+      <div>
+        <div class="flex justify-between text-sm mb-1">
+          <span class="text-gray-600 font-medium">Neutral</span>
+          <span>
+            {{ sentiment.neutral }} 
+            ({% if sentiment.total > 0 %}{% widthratio sentiment.neutral sentiment.total 100 %}%{% else %}0%{% endif %})
+          </span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-3">
+          <div 
+            class="bg-gray-400 h-3 rounded-full transition-all"
+            style="width: {% if sentiment.total > 0 %}{% widthratio sentiment.neutral sentiment.total 100 %}%{% else %}0%{% endif %}"
+          ></div>
+        </div>
+      </div>
+      
+      <div>
+        <div class="flex justify-between text-sm mb-1">
+          <span class="text-red-600 font-medium">Negative</span>
+          <span>
+            {{ sentiment.negative }} 
+            ({% if sentiment.total > 0 %}{% widthratio sentiment.negative sentiment.total 100 %}%{% else %}0%{% endif %})
+          </span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-3">
+          <div 
+            class="bg-red-500 h-3 rounded-full transition-all"
+            style="width: {% if sentiment.total > 0 %}{% widthratio sentiment.negative sentiment.total 100 %}%{% else %}0%{% endif %}"
+          ></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hourly Mentions Chart -->
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-xl font-bold mb-4">Mentions Over Last 24 Hours</h2>
+    <canvas id="hourlyChart" height="100"></canvas>
+  </div>
+
+  <!-- Top Topics -->
+  {% if topics %}
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-xl font-bold mb-4">Top Topics</h2>
+    <div class="space-y-2">
+      {% for topic in topics|slice:":10" %}
+      <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+        <span class="text-sm font-medium text-gray-700">{{ topic.topic|default:"Unknown" }}</span>
+        <span class="text-sm text-gray-500 bg-white px-3 py-1 rounded-full">
+          {{ topic.count }} mentions
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Sources -->
+  {% if sources %}
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-xl font-bold mb-4">Sources</h2>
+    <div class="flex flex-wrap gap-2">
+      {% for source in sources %}
+      <span class="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+        {{ source.source }}: {{ source.count }}
+      </span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  // Hourly mentions chart
+  const hourlyData = {{ hourly_mentions|safe }};
+  const ctx = document.getElementById('hourlyChart');
+  if (ctx) {
+    const maxCount = Math.max(...hourlyData.map(h => h.count), 1);
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: hourlyData.map(h => h.hour + ':00'),
+        datasets: [{
+          label: 'Mentions',
+          data: hourlyData.map(h => h.count),
+          backgroundColor: 'rgba(59, 130, 246, 0.5)',
+          borderColor: 'rgba(59, 130, 246, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}
+
