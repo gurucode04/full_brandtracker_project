@@ -17,3 +17,8 @@ django-cors-headers
 torch
 kombu>=5.0
 daphne
+psycopg2-binary
+dj-database-url
+whitenoise[brotli]
+gunicorn
+uvicorn
