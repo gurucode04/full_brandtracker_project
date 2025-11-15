@@ -10,7 +10,7 @@ services:
     name: brandtracker
     runtime: python
     buildCommand: './build.sh'
-    startCommand: 'python -m gunicorn brandtracker.asgi:application -k uvicorn.workers.UvicornWorker'
+    startCommand: './start.sh'
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -22,4 +22,7 @@ services:
         value: 2
       - key: USE_LIGHTWEIGHT_NLP
         value: true
+      # PORT is automatically set by Render.com, but can be overridden if needed
+      # - key: PORT
+      #   value: 8000
 

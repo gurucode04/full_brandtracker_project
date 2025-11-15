@@ -6,11 +6,13 @@ services:
       - "6379:6379"
   web:
     build: .
-    command: bash -c "python manage.py migrate && daphne -b 0.0.0.0 -p 8000 brandtracker.asgi:application"
+    command: bash -c "python manage.py migrate && daphne -b 0.0.0.0 -p ${PORT:-8000} brandtracker.asgi:application"
     volumes:
       - .:/app
     ports:
-      - "8000:8000"
+      - "${PORT:-8000}:${PORT:-8000}"
+    environment:
+      - PORT=${PORT:-8000}
     depends_on:
       - redis
   worker:

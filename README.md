@@ -56,9 +56,14 @@ This repository is a full Django application for the Brand Mention Tracker demo.
    ```bash
    python manage.py runserver
    ```
+   
+   Or use the production server with custom port:
+   ```bash
+   PORT=8000 ./start.sh
+   ```
 
 7. **Open your browser:**
-   Navigate to `http://localhost:8000`
+   Navigate to `http://localhost:8000` (or the port specified by `PORT` environment variable)
 
 ## Usage
 

@@ -13,6 +13,9 @@ else
     pip install -r requirements.txt
 fi
 
+# Make start script executable
+chmod +x start.sh || true
+
 # Convert static asset files
 python manage.py collectstatic --no-input
 
