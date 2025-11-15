@@ -10,11 +10,13 @@ beautifulsoup4
 lxml
 requests
 python-dotenv
+# Heavy ML libraries - can be disabled via USE_LIGHTWEIGHT_NLP env var
+# Note: torch will be installed automatically by build.sh if not in lightweight mode
+# torch is not listed here to allow CPU-only installation
 transformers
 sentence-transformers
 bertopic[all]
 django-cors-headers
-torch
 kombu>=5.0
 daphne
 psycopg2-binary

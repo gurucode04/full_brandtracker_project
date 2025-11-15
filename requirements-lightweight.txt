@@ -1,0 +1,24 @@
+# Lightweight requirements for memory-constrained deployments
+# Excludes heavy ML libraries (torch, transformers, sentence-transformers, bertopic)
+
+Django>=4.2
+djangorestframework
+channels
+channels-redis
+celery>=5.0
+redis
+textblob
+scikit-learn
+beautifulsoup4
+lxml
+requests
+python-dotenv
+django-cors-headers
+kombu>=5.0
+daphne
+psycopg2-binary
+dj-database-url
+whitenoise[brotli]
+gunicorn
+uvicorn
+

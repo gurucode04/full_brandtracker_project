@@ -19,5 +19,7 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: WEB_CONCURRENCY
-        value: 4
+        value: 2
+      - key: USE_LIGHTWEIGHT_NLP
+        value: true
 
