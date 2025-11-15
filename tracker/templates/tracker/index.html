@@ -1,0 +1,23 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brand Mention Tracker</title>
+    {% if css_file %}
+    <link rel="stylesheet" crossorigin href="{% static css_file %}">
+    {% endif %}
+  </head>
+  <body>
+    <div id="root"></div>
+    {% if js_file %}
+    <script type="module" crossorigin src="{% static js_file %}"></script>
+    {% else %}
+    <div style="padding: 20px; text-align: center;">
+      <h2>React app not built</h2>
+      <p>Please run: <code>cd frontend && npm run build</code></p>
+    </div>
+    {% endif %}
+  </body>
+</html>
