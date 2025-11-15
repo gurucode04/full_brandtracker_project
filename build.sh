@@ -5,11 +5,12 @@ set -o errexit
 # Optimize pip for memory usage
 export PIP_NO_CACHE_DIR=1
 export PIP_DISABLE_PIP_VERSION_CHECK=1
+export PIP_DEFAULT_TIMEOUT=60
 
 # Install requirements based on lightweight mode
 if [ "$USE_LIGHTWEIGHT_NLP" = "true" ]; then
-    echo "Installing in lightweight mode (skipping heavy ML libraries)..."
-    # Install one package at a time to reduce memory usage
+    echo "Installing in ultra-lightweight mode (minimal dependencies)..."
+    # Install core requirements with memory optimizations
     pip install --no-cache-dir -r requirements-lightweight.txt
 else
     echo "Installing all dependencies including ML libraries..."

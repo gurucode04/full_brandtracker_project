@@ -34,13 +34,8 @@ try:
 except ImportError:
     logger.warning("bertopic not available")
 
-# Import lightweight fallback
-try:
-    from textblob import TextBlob
-    _textblob_available = True
-except ImportError:
-    _textblob_available = False
-    logger.warning("TextBlob not available - sentiment analysis will be basic")
+# Pure Python keyword-based sentiment (no external dependencies)
+_textblob_available = False  # Not using TextBlob to save memory
 
 # numpy is only needed for embeddings, make it optional
 try:
@@ -110,33 +105,45 @@ def analyze_text(text, use_topic=True):
         sentiment_pipeline = _get_sentiment_pipeline()
         
         if sentiment_pipeline == 'textblob' or not _transformers_available:
-            # Use lightweight TextBlob fallback
-            if _textblob_available:
-                blob = TextBlob(text)
-                polarity = blob.sentiment.polarity
-                score = abs(polarity)
-                if polarity > 0.1:
-                    sentiment = 'positive'
-                elif polarity < -0.1:
-                    sentiment = 'negative'
-                else:
-                    sentiment = 'neutral'
+            # Pure Python keyword-based sentiment analysis (no dependencies)
+            text_lower = text.lower()
+            
+            # Expanded keyword lists for better accuracy
+            positive_words = [
+                'good', 'great', 'excellent', 'amazing', 'love', 'best', 'awesome', 'fantastic',
+                'wonderful', 'perfect', 'brilliant', 'outstanding', 'superb', 'terrific', 'fabulous',
+                'delighted', 'pleased', 'satisfied', 'happy', 'joy', 'enjoy', 'like', 'prefer',
+                'recommend', 'praise', 'appreciate', 'admire', 'impressed', 'success', 'win', 'victory'
+            ]
+            negative_words = [
+                'bad', 'terrible', 'awful', 'hate', 'worst', 'horrible', 'disappointed',
+                'poor', 'worst', 'fail', 'failure', 'problem', 'issue', 'error', 'mistake',
+                'disgusting', 'annoying', 'frustrated', 'angry', 'upset', 'sad', 'unhappy',
+                'dislike', 'complain', 'criticize', 'blame', 'fault', 'defect', 'broken'
+            ]
+            
+            # Count occurrences
+            pos_count = sum(1 for word in positive_words if word in text_lower)
+            neg_count = sum(1 for word in negative_words if word in text_lower)
+            
+            # Calculate sentiment
+            total_words = len(text_lower.split())
+            if total_words > 0:
+                pos_ratio = pos_count / total_words
+                neg_ratio = neg_count / total_words
+                score = max(pos_ratio, neg_ratio) * 2  # Scale to 0-1 range
             else:
-                # Basic keyword-based fallback
-                text_lower = text.lower()
-                positive_words = ['good', 'great', 'excellent', 'amazing', 'love', 'best', 'awesome', 'fantastic']
-                negative_words = ['bad', 'terrible', 'awful', 'hate', 'worst', 'horrible', 'disappointed']
-                pos_count = sum(1 for word in positive_words if word in text_lower)
-                neg_count = sum(1 for word in negative_words if word in text_lower)
-                if pos_count > neg_count:
-                    sentiment = 'positive'
-                    score = 0.6
-                elif neg_count > pos_count:
-                    sentiment = 'negative'
-                    score = 0.6
-                else:
-                    sentiment = 'neutral'
-                    score = 0.5
+                score = 0.5
+            
+            if pos_count > neg_count:
+                sentiment = 'positive'
+                score = min(0.9, 0.5 + (pos_count - neg_count) * 0.1)
+            elif neg_count > pos_count:
+                sentiment = 'negative'
+                score = min(0.9, 0.5 + (neg_count - pos_count) * 0.1)
+            else:
+                sentiment = 'neutral'
+                score = 0.5
         else:
             # Use transformers
             res = sentiment_pipeline(text[:512])[0]

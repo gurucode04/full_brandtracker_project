@@ -9,12 +9,16 @@ echo "Starting application on port $PORT"
 # Optimize Python for memory usage
 export PYTHONUNBUFFERED=1
 export PYTHONDONTWRITEBYTECODE=1
+export PYTHONHASHSEED=0
 
+# Use single worker with memory optimizations
 exec python -m gunicorn brandtracker.asgi:application \
     -k uvicorn.workers.UvicornWorker \
     --bind 0.0.0.0:$PORT \
-    --workers ${WEB_CONCURRENCY:-1} \
+    --workers 1 \
+    --threads 2 \
     --timeout 120 \
-    --max-requests 1000 \
-    --max-requests-jitter 50
+    --max-requests 500 \
+    --max-requests-jitter 50 \
+    --preload
 

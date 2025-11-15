@@ -1,23 +1,25 @@
-# Lightweight requirements for memory-constrained deployments
-# Excludes heavy ML libraries (torch, transformers, sentence-transformers, bertopic, scikit-learn, numpy)
+# Ultra-lightweight requirements for memory-constrained deployments (<500MB)
+# Excludes: torch, transformers, sentence-transformers, bertopic, scikit-learn, numpy, textblob
+# Makes channels-redis, celery, redis optional (has fallbacks)
 
 Django>=4.2
 djangorestframework
 channels
-channels-redis
-celery>=5.0
-redis
-textblob
 beautifulsoup4
 lxml
 requests
 python-dotenv
 django-cors-headers
-kombu>=5.0
-daphne
 psycopg2-binary
 dj-database-url
-whitenoise[brotli]
+whitenoise
 gunicorn
 uvicorn
+
+# Optional dependencies (installed if available, app works without them)
+# channels-redis  # Optional - uses in-memory fallback
+# celery>=5.0     # Optional - runs synchronously without it
+# redis           # Optional - only needed if using Celery/Redis
+# kombu>=5.0      # Optional - only needed for Celery
+# daphne          # Optional - using gunicorn+uvicorn instead
 
