@@ -1,5 +1,5 @@
 # Lightweight requirements for memory-constrained deployments
-# Excludes heavy ML libraries (torch, transformers, sentence-transformers, bertopic)
+# Excludes heavy ML libraries (torch, transformers, sentence-transformers, bertopic, scikit-learn, numpy)
 
 Django>=4.2
 djangorestframework
@@ -8,7 +8,6 @@ channels-redis
 celery>=5.0
 redis
 textblob
-scikit-learn
 beautifulsoup4
 lxml
 requests

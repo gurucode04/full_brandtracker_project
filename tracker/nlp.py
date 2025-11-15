@@ -42,7 +42,17 @@ except ImportError:
     _textblob_available = False
     logger.warning("TextBlob not available - sentiment analysis will be basic")
 
-import numpy as np
+# numpy is only needed for embeddings, make it optional
+try:
+    import numpy as np
+    _numpy_available = True
+except ImportError:
+    _numpy_available = False
+    # Create a minimal dummy np for compatibility
+    class np:
+        @staticmethod
+        def array(data):
+            return list(data) if hasattr(data, '__iter__') else [data]
 
 SENTIMENT_MODEL_NAME = os.environ.get('SENTIMENT_MODEL','distilbert-base-uncased-finetuned-sst-2-english')
 EMBED_MODEL_NAME = os.environ.get('EMBED_MODEL','all-MiniLM-L6-v2')
@@ -78,9 +88,9 @@ def _get_embedder():
     return _embedder
 
 def encode_text(text):
-    if USE_LIGHTWEIGHT_NLP or not _sentence_transformers_available:
+    if USE_LIGHTWEIGHT_NLP or not _sentence_transformers_available or not _numpy_available:
         logger.warning("encode_text called but embeddings not available in lightweight mode")
-        return np.array([])
+        return [] if not _numpy_available else np.array([])
     embedder = _get_embedder()
     if embedder is None:
         return np.array([])
@@ -144,7 +154,7 @@ def analyze_text(text, use_topic=True):
 
     # Embeddings (skip in lightweight mode)
     emb_bytes = None
-    if not USE_LIGHTWEIGHT_NLP and _sentence_transformers_available:
+    if not USE_LIGHTWEIGHT_NLP and _sentence_transformers_available and _numpy_available:
         try:
             embedder = _get_embedder()
             if embedder is not None:

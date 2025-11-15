@@ -19,7 +19,7 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: WEB_CONCURRENCY
-        value: 2
+        value: 1
       - key: USE_LIGHTWEIGHT_NLP
         value: true
       # PORT is automatically set by Render.com, but can be overridden if needed
