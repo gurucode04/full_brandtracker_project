@@ -1,4 +1,10 @@
-from celery import shared_task
+# Import celery with graceful fallback
+try:
+    from celery import shared_task
+except ImportError:
+    # Celery not installed, create a dummy decorator
+    def shared_task(func):
+        return func
 from .models import Mention, Alert
 from django.utils.dateparse import parse_datetime
 from django.utils import timezone
