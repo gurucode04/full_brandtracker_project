@@ -2,7 +2,7 @@
 # Startup script that uses PORT environment variable
 # Defaults to 8000 if PORT is not set
 
-PORT=${PORT:-8000}
+PORT=${PORT:-10000}
 
 echo "Starting application on port $PORT"
 
