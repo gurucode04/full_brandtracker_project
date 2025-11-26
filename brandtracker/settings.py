@@ -147,12 +147,10 @@ except ImportError:
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'tracker' / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # This production code might break development mode, so we check whether we're in DEBUG mode
 if not DEBUG:
-    # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    
     # Enable the WhiteNoise storage backend (without brotli compression to save memory)
     # Compresses static files and renames them with unique names for long-term caching
     try:

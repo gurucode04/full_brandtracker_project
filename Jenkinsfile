@@ -90,7 +90,7 @@ pipeline {
                         bat """
                             call %VENV_PATH%\\Scripts\\activate
                             start "" /B cmd /c "python manage.py runserver 0.0.0.0:%APP_PORT% --noreload > deploy.log 2>&1"
-                            powershell -Command "$attempts=0; while($attempts -lt 15) { try { (Invoke-WebRequest -UseBasicParsing http://localhost:%APP_PORT%/).StatusCode; exit 0 } catch { Start-Sleep -Seconds 2; $attempts++ } }; exit 1"
+                            powershell -Command "\$attempts=0; while(\$attempts -lt 15) { try { (Invoke-WebRequest -UseBasicParsing http://localhost:%APP_PORT%/).StatusCode; exit 0 } catch { Start-Sleep -Seconds 2; \$attempts++ } }; exit 1"
                         """
                     }
                     env.DEPLOY_URL = "http://localhost:${env.APP_PORT}"
