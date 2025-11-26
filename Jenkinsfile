@@ -89,8 +89,8 @@ pipeline {
                     } else {
                         bat """
                             call %VENV_PATH%\\Scripts\\activate
-                            start "" /B python manage.py runserver 0.0.0.0:%APP_PORT% > deploy.log 2>&1
-                            ping 127.0.0.1 -n 6 > nul
+                            start "" /B cmd /c "python manage.py runserver 0.0.0.0:%APP_PORT% --noreload > deploy.log 2>&1"
+                            powershell -Command "$attempts=0; while($attempts -lt 15) { try { (Invoke-WebRequest -UseBasicParsing http://localhost:%APP_PORT%/).StatusCode; exit 0 } catch { Start-Sleep -Seconds 2; $attempts++ } }; exit 1"
                         """
                     }
                     env.DEPLOY_URL = "http://localhost:${env.APP_PORT}"
