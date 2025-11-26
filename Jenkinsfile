@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         VENV_PATH = 'venv'
-        APP_PORT  = '10000'
+        APP_PORT  = '9000'
     }
 
     stages {
